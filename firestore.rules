@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+    match /users/{userId} {
+      // You'll probably want to add security rules around the user document 
+      // itself. For now, though, let's look at our subcollections:
+      allow read, write: if request.auth.uid == userId;
+      match /banks/{anything=**} {
+        // Only the user can read documents in their private collection
+        allow read, write, delete: if request.auth.uid == userId;
+      }
+      match /products/{anything=**} {
+        // Only the user can read documents in their private collection
+        allow read, write: if request.auth.uid == userId;
+      }
+    }
+    match /products/{id}{
+    	allow read: if request.auth != null
+    }
+  }
+}
